@@ -1,4 +1,5 @@
 const express = require("express");
+const axios = require("axios");
 const path = require("path");
 const bodyParser = require("body-parser");
 const app = express();
@@ -13,6 +14,7 @@ const config = new Configuration({
 const openai = new OpenAIApi(config);
 
 const runPrompt = async (prompt) => {
+  console.log("I'm in index.js", prompt);
   try {
     const response = await openai.createChatCompletion({
       model: "gpt-3.5-turbo",
