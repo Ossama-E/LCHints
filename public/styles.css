@@ -1,0 +1,151 @@
+/* General CSS Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Roboto", sans-serif;
+  color: #bdc3c7; /* A slightly warmer gray */
+  background-color: #1c1c1c; /* Darker background for better contrast */
+  line-height: 1.6;
+  padding: 20px;
+}
+
+/* Header Styles */
+#header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 0;
+  border-bottom: 1px solid #424242;
+}
+
+#header h2 {
+  font-size: 20px;
+  color: #7f8c8d; /* Muted teal */
+  letter-spacing: 1px; /* Letter spacing for aesthetic */
+}
+
+.btn-nav {
+  padding: 12px 24px; /* Increased padding for bigger buttons */
+  border-radius: 5px;
+  text-decoration: none;
+  border: 1px solid #7f8c8d;
+  background-color: #2c3e50; /* Darker color */
+  color: #ecf0f1; /* Brighter font color */
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease-out; /* Smoother transition */
+}
+
+.btn-nav:hover {
+  background-color: #34495e;
+  color: #bdc3c7;
+}
+
+/* Logo Styles */
+#logo {
+  text-align: center;
+  text-decoration: none;
+  font-size: 4.5em; /* Slightly smaller for minimalistic look */
+  margin: 30px 0; /* Less margin for a tighter look */
+  color: #7f8c8d;
+}
+
+.first {
+  color: #89abe3; /* Soft Blue */
+}
+.second {
+  color: #fcf6f5; /* Off White */
+}
+.third {
+  color: #f2cc8f; /* Soft Yellow */
+}
+
+/* Content Styles */
+#content {
+  display: flex; /* Add this line */
+  justify-content: center; /* Add this line */
+  align-items: center; /* Add this line */
+  flex-direction: column; /* Add this line */
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  text-align: center;
+}
+
+#searchbox {
+  width: 70%;
+  height: 40px;
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #424242;
+  font-size: 18px;
+  margin: 20px auto;
+  background-color: #424242;
+  color: #bdc3c7;
+}
+
+.button-group {
+  margin-top: 30px;
+}
+
+.btn {
+  padding: 10px 20px;
+  margin: 0 10px;
+  border: 1px solid #424242;
+  border-radius: 5px;
+  background-color: #2c3e50;
+  font-size: 16px;
+  cursor: pointer;
+  color: #bdc3c7;
+  transition: background-color 0.3s ease-out;
+}
+
+.btn:hover {
+  background-color: #34495e;
+  color: #ecf0f1;
+}
+
+/* Footer Styles */
+#footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 0;
+  border-top: 1px solid #424242;
+  font-size: 14px;
+  color: #7f8c8d;
+}
+
+.result-title {
+  display: flex;
+  justify-content: space-around;
+  margin: 20px auto;
+  font-size: 1.4rem; /* Increased font-size */
+}
+
+.result-list {
+  display: block; /* Change this line */
+  text-align: center;
+  font-size: 1.2rem;
+  padding: 10px 20px;
+  background-color: #2c3e50;
+  margin: 2% auto; /* Change this line */
+  border-radius: 5px;
+  width: 80%;
+}
+
+.result-list ul {
+  list-style-position: inside;
+  text-align: left;
+}
+
+.result-list li {
+  display: inline-block;
+  width: 100%;
+  text-align: center;
+}
