@@ -219,6 +219,6 @@ solnBtn.addEventListener("click", async (event) => {
 });
 
 var dropdown = document.querySelector(".dropdown");
-dropdown.addEventListener("click", function () {
+dropdown.addEventListener("click", function (e) {
   menu.style.display = menu.style.display === "none" ? "block" : "none";
 });

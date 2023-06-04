@@ -182,14 +182,13 @@ body {
   border-width: 0 2px 2px 0;
   display: inline-block;
   padding: 3px;
+  margin-left: 5px; /* Add space between the text and the arrow */
   transform: rotate(45deg);
 }
 
 .dropdown .menu {
   z-index: 10;
   position: absolute;
-  /* top: 100%; */
-  /* left: 0; */
   display: none;
   list-style-type: none;
   padding: 0;
@@ -197,6 +196,8 @@ body {
   background-color: #333;
   border-radius: 5px;
 }
+
+/* ...Remaining CSS code... */
 
 .dropdown .menu li {
   padding: 10px;
@@ -206,7 +207,6 @@ body {
 
 .dropdown .menu li:hover {
   background-color: #555;
-  colo
 }
 
 .code-info {
@@ -227,7 +227,6 @@ body {
   flex-grow: 1;
   margin-right: 10px;
 }
-
 
 .popup {
   display: flex;
