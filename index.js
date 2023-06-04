@@ -29,7 +29,7 @@ const runPrompt = async (prompt) => {
   }
 };
 
-app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static(__dirname));
 app.use(bodyParser.json()); // Parse JSON request bodies
 
 app.post("/processQuestion", async (req, res) => {
