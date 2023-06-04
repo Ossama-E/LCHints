@@ -2,6 +2,7 @@ const express = require("express");
 const path = require("path");
 const bodyParser = require("body-parser");
 const app = express();
+const port = process.env.PORT || 3000;
 
 const { Configuration, OpenAIApi } = require("openai");
 
@@ -51,6 +52,6 @@ app.post("/processQuestion", async (req, res) => {
 
 app.use(express.static("public"));
 
-app.listen(3000, () => {
-  console.log("Listening on port 3000");
+app.listen(port, () => {
+  console.log(`Listening on port ${port}`);
 });
