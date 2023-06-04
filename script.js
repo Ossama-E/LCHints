@@ -62,7 +62,9 @@ function closePopup() {
 
 require.config({ paths: { vs: "node_modules/monaco-editor/min/vs" } });
 let editor = "";
+
 require(["vs/editor/editor.main"], function () {
+  console.log("the user choose language -> ", language);
   // language = language == "Coding Language" ? "JavaScript" : language;
   editor = monaco.editor.create(document.getElementById("code-input-box"), {
     value: ["function x() {", '\tconsole.log("Hello world!");', "}"].join("\n"),
@@ -76,7 +78,21 @@ require(["vs/editor/editor.main"], function () {
 menuItems.forEach(function (item) {
   item.addEventListener("click", function () {
     selectElement.textContent = this.textContent;
+    language = selectElement.textContent;
     console.log(selectElement.textContent);
+    if (editor) {
+      editor.dispose();
+    }
+
+    // Create a new Monaco editor with the updated language
+    editor = monaco.editor.create(document.getElementById("code-input-box"), {
+      value: ["function x() {", '\tconsole.log("Hello world!");', "}"].join(
+        "\n"
+      ),
+      language: language.toLowerCase(), // Set the language based on the selected item
+    });
+    monaco.editor.setTheme("vs-dark");
+    // editor.setModelLanguage(editor.getModel(), language.toLowerCase());
     // dropdown.querySelector(".menu").style.display = "none";
   });
 });
