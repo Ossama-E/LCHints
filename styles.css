@@ -157,7 +157,7 @@ body {
 
 #code-input-box {
   width: 800px;
-  height: 400px;
+  height: 300px;
   border: 1px solid grey;
   text-align: left;
   border: 1px solid grey;
@@ -221,6 +221,8 @@ body {
   border-radius: 10px;
   flex-grow: 1;
   margin-right: 10px;
+  height: 5vh;
+  font-size: 1rem;
 }
 
 .popup {
