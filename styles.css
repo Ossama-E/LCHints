@@ -1,4 +1,3 @@
-/* General CSS Reset */
 * {
   margin: 0;
   padding: 0;
@@ -182,14 +181,14 @@ body {
   border-width: 0 2px 2px 0;
   display: inline-block;
   padding: 3px;
-  margin-left: 5px; /* Add space between the text and the arrow */
+  margin-left: 5px;
   transform: rotate(45deg);
 }
 
 .dropdown .menu {
   z-index: 10;
   position: absolute;
-  display: none;
+  display: block;
   list-style-type: none;
   padding: 0;
   margin: 0;
@@ -197,29 +196,25 @@ body {
   border-radius: 5px;
 }
 
-/* ...Remaining CSS code... */
-
 .dropdown .menu li {
   padding: 10px;
   cursor: pointer;
   color: #fff;
+  transition: 0.2s;
 }
 
 .dropdown .menu li:hover {
   background-color: #555;
+  opacity: 0.5;
+  transition: opacity 0.5s ease-in-out;
 }
 
 .code-info {
   display: flex;
-  justify-content: space-between; /* Align horizontally */
-  align-items: center; /* Align vertically */
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 20px;
-  width: 800px; /* Match the width of the code-input-box */
-}
-
-.dropdown {
-  flex-shrink: 0; /* Don't shrink this */
-  border-radius: 10px;
+  width: 800px;
 }
 
 #question-name-box {
@@ -280,4 +275,8 @@ body {
 
 .popup-enter {
   animation: fadeIn 1s ease-in forwards;
+}
+
+.hidden {
+  opacity: 0;
 }

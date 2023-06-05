@@ -65,21 +65,18 @@ let editor = "";
 
 require(["vs/editor/editor.main"], function () {
   console.log("the user choose language -> ", language);
-  // language = language == "Coding Language" ? "JavaScript" : language;
   editor = monaco.editor.create(document.getElementById("code-input-box"), {
     value: ["function x() {", '\tconsole.log("Hello world!");', "}"].join("\n"),
     language: `${language}`,
   });
   monaco.editor.setTheme("vs-dark");
-
-  // console.log("Test");
 });
 
 menuItems.forEach(function (item) {
   item.addEventListener("click", function () {
     selectElement.textContent = this.textContent;
     language = selectElement.textContent;
-    console.log(selectElement.textContent);
+    console.log(language);
     if (editor) {
       editor.dispose();
     }
@@ -92,8 +89,6 @@ menuItems.forEach(function (item) {
       language: language.toLowerCase(), // Set the language based on the selected item
     });
     monaco.editor.setTheme("vs-dark");
-    // editor.setModelLanguage(editor.getModel(), language.toLowerCase());
-    // dropdown.querySelector(".menu").style.display = "none";
   });
 });
 
@@ -179,7 +174,6 @@ function animateTyping(element, text, speed) {
     function type() {
       if (i < text.length) {
         element.textContent += text.charAt(i);
-        // i = text.length <= i + 2 ? i + 1 : i + 2;
         ++i;
         setTimeout(type, speed);
       } else {
@@ -218,7 +212,35 @@ solnBtn.addEventListener("click", async (event) => {
   displayResponse(event, false, language);
 });
 
-var dropdown = document.querySelector(".dropdown");
-dropdown.addEventListener("click", function (e) {
-  menu.style.display = menu.style.display === "none" ? "block" : "none";
+const dropdown = document.querySelector(".dropdown");
+window.addEventListener("click", function (event) {
+  if (!dropdown.contains(event.target)) {
+    applyToMenu("add");
+  }
 });
+
+dropdown.addEventListener("click", function (e) {
+  e.stopPropagation();
+  applyToMenu("toggle");
+});
+
+function applyToMenu(action) {
+  const toggleChange = (item) => {
+    item.classList.toggle("hidden");
+  };
+  const addChange = (item) => {
+    item.classList.add("hidden");
+  };
+
+  if (action === "toggle") {
+    menu.classList.toggle("hidden");
+    menuItems.forEach((item, index) => {
+      setTimeout(() => toggleChange(item), index * 50);
+    });
+  } else {
+    menu.classList.add("hidden");
+    menuItems.forEach((item, index) => {
+      setTimeout(() => addChange(item), index * 50);
+    });
+  }
+}
