@@ -173,7 +173,7 @@ require(["vs/editor/editor.main"], function () {
 const displayResponse = async (e, hint) => {
   e.preventDefault();
   resultList.scrollIntoView({ behavior: "smooth" });
-  // If inputs have an issue, let the validInputs function handle it
+  // If inputs have an issue, let thef validInputs function handle it
   if (!validInputs()) {
     return;
   }
