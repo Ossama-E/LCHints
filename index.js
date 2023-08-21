@@ -14,7 +14,6 @@ const config = new Configuration({
 const openai = new OpenAIApi(config);
 
 const runPrompt = async (prompt) => {
-  console.log("I'm in index.js", prompt);
   try {
     const response = await openai.createChatCompletion({
       model: "gpt-3.5-turbo",
@@ -28,7 +27,6 @@ const runPrompt = async (prompt) => {
     return response.data.choices[0].message.content;
   } catch (error) {
     console.log("Failed to generate completion");
-    console.log("Error-runprompt", error.message);
   }
 };
 
@@ -38,13 +36,9 @@ app.use(bodyParser.json()); // Parse JSON request bodies
 app.post("/processQuestion", async (req, res) => {
   // Extract the question from the request body
   const question = req.body.question;
-  // console.log(question);
-
   try {
     // Call the OpenAI API using async/await and await the response
     const response = await runPrompt(question);
-    // console.log(response);
-    // res.send({ response });
     res.json({ response });
   } catch (error) {
     console.error("Error:-post", error);

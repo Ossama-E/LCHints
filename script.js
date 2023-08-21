@@ -159,7 +159,6 @@ function reverseAnimateTyping(element, text, speed) {
 require.config({ paths: { vs: "node_modules/monaco-editor/min/vs" } });
 // 2. Loading the visuals for the code editor,
 require(["vs/editor/editor.main"], function () {
-  console.log("the user choose language -> ", language);
   editor = monaco.editor.create(document.getElementById("code-input-box"), {
     value: helloWorldFunctions[language.toLowerCase()],
     language: language,
@@ -203,9 +202,7 @@ const displayResponse = async (e, hint) => {
   let result = await postQuestion(codeInQuestion, hint, language);
   let notCodeTest = result.response.toUpperCase();
   // split based on hints
-  // console.log("the result we got back: ", result.response);
 
-  // "THIS IS NOT A CODING CHALLENGE."
   if (notCodeTest.includes("NOT A CODING")) {
     // Handle the special case
     resultList.innerHTML = "THIS IS NOT A CODING QUESTION";
@@ -216,7 +213,6 @@ const displayResponse = async (e, hint) => {
     const splitResult = result.response.split(/\d+\./);
     // remove spinner
     spinner.style.display = "none";
-    // console.log(result);
 
     // make a new element for each of the three hints and animate them
     for (const [index, point] of splitResult.entries()) {
@@ -230,7 +226,6 @@ const displayResponse = async (e, hint) => {
   } else {
     const splitResult = result.response.split(`\n`);
     spinner.style.display = "none";
-    // console.log(result);
 
     // make a new element for each of the three hints and animate them
     for (const [index, point] of splitResult.entries()) {
@@ -251,7 +246,6 @@ const postQuestion = async (codeInQuestion, hint, languageSelected) => {
   let action = hint
     ? "provide three very SPECIFIC hints on how to FIX my code"
     : "provide the solution for this question";
-  // console.log("the action is ", action);
   // engineer the prompt
   if (hint) {
     prompt = `I'm working on the ${questionName} in ${languageSelected}, ${action}:\n${codeInQuestion}\nLimit your response to 250 characters. Respond with "THIS IS NOT A CODING QUESTION" if not relevant. Split each hint by number then a dot`;
@@ -290,8 +284,7 @@ const postQuestion = async (codeInQuestion, hint, languageSelected) => {
 // 1.
 hintBtn.addEventListener("click", async (event) => {
   questionName = questionBar.value;
-  // console.log("this is my inquiry", questionName);
-  // console.log(currContent);
+
   displayResponse(event, true, language);
 });
 // 2.
@@ -318,7 +311,6 @@ menuItems.forEach(function (item) {
     language = selectElement.textContent;
     // Get the code that the user inputted
     let currContent = editor.getValue();
-    // console.log("the content of the code is: ", currContent);
 
     // Resettig the current editor so new language and visuals can be loaded
     if (editor) {
