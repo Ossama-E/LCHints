@@ -171,114 +171,103 @@ require(["vs/editor/editor.main"], function () {
 // (user chose a language, typed the name of the question, and typed his code)
 const displayResponse = async (e, hint) => {
    e.preventDefault()
-   resultList.scrollIntoView({ behavior: "smooth" })
-   // If inputs have an issue, let thef validInputs function handle it
-   if (!validInputs()) {
-      return
-   }
+   try {
+      if (!validInputs()) {
+         return
+      }
 
-   // Initialize the spinner
-   spinner.style.display = "block"
-   resultList.innerHTML = ""
-   resultList.appendChild(loadMessage)
+      // Show loading state
+      resultList.scrollIntoView({ behavior: "smooth" })
+      spinner.style.display = "block"
+      resultList.innerHTML = ""
+      resultList.appendChild(loadMessage)
 
-   // Get the name of the LeetCode question the user inputted
-   const codeInQuestion = editor.getValue()
+      const codeInQuestion = editor.getValue()
 
-   // animate the message
-   await animateTyping(loadMessage, "Thinking about the best hints...", 60)
-   await new Promise((resolve) => setTimeout(resolve, 1500)) // Delay before starting the reverse typing animation
-   // reverse type the animated text while the user waits for the response
-   await reverseAnimateTyping(loadMessage, "Thinking about the best hints...", 30)
+      // Animate loading message
+      await animateTyping(loadMessage, "Thinking about the best hints...", 60)
+      await new Promise((resolve) => setTimeout(resolve, 1500))
+      await reverseAnimateTyping(loadMessage, "Thinking about the best hints...", 30)
 
-   // Reset the content
-   resultList.innerHTML = ""
+      // Reset content
+      resultList.innerHTML = ""
 
-   let result = await postQuestion(codeInQuestion, hint, language)
-   let notCodeTest = result.response.toUpperCase()
-   // split based on hints
+      // Make API request
+      const result = await postQuestion(codeInQuestion, hint, language)
+      
+      console.log('API Response:', result)
 
-   if (notCodeTest.includes("NOT A CODING")) {
-      // Handle the special case
-      resultList.innerHTML = "THIS IS NOT A CODING QUESTION"
-      spinner.style.display = "none"
-      return
-   }
-   if (hint) {
-      const splitResult = result.response.split(/\d+\./)
-      // remove spinner
-      spinner.style.display = "none"
+      // Check if it's not a coding question
+      if (result.response.toUpperCase().includes("NOT A CODING")) {
+         resultList.innerHTML = "THIS IS NOT A CODING QUESTION"
+         return
+      }
 
-      // make a new element for each of the three hints and animate them
-      for (const [index, point] of splitResult.entries()) {
-         if (index != 0) {
+      // Clean up the response text
+      let cleanResponse = result.response
+         .replace(/```/g, '') // Remove code block markers
+         .replace(/^\s*[\d.]+\s*['"]\s*/gm, '') // Remove numbered quotes at start of lines
+         .replace(/['"]\s*$/gm, '') // Remove quotes at end of lines
+         .trim()
+
+      // Handle hints or solution
+      if (hint) {
+         // Split by numbers followed by dot, but keep the numbers
+         const hints = cleanResponse.split(/(?=\d+\.)/)
+            .filter(hint => hint.trim())
+            .map(hint => hint.trim())
+
+         for (const hint of hints) {
             const listItem = document.createElement("li")
             resultList.appendChild(listItem)
-
-            await animateTyping(listItem, `${index}. ` + point, 20)
+            await animateTyping(listItem, hint, 20)
          }
-      }
-   } else {
-      const splitResult = result.response.split(`\n`)
-      spinner.style.display = "none"
+      } else {
+         const lines = cleanResponse.split('\n')
+            .filter(line => line.trim())
+            .map(line => line.trim())
 
-      // make a new element for each of the three hints and animate them
-      for (const [index, point] of splitResult.entries()) {
-         if (index != 0) {
+         for (const line of lines) {
             const listItem = document.createElement("li")
             resultList.appendChild(listItem)
-
-            await animateTyping(listItem, point, 20)
+            await animateTyping(listItem, line, 20)
          }
       }
+
+   } catch (error) {
+      console.error('Error in displayResponse:', error)
+      resultList.innerHTML = "An error occurred. Please try again."
+   } finally {
+      spinner.style.display = "none"
    }
 }
 
 // 2. Function to generate exact prompt
 const generatePrompt = (questionName, language, codeInQuestion, hint) => {
-   let action = hint ? "Provide exactly three precise hints on how to fix my code" : "Provide a correct and optimized solution"
+   if (hint) {
+      return `For the LeetCode question "${questionName}" in ${language}, here is my code:
+      
+${codeInQuestion}
 
-   let format = hint
-      ? `1. [Precise Hint]\n2. [Precise Hint]\n3. [Precise Hint]`
-      : `[One-sentence explanation of the solution approach]\n\n[Corrected and optimized code]`
+Please provide exactly three clear and concise hints on how to solve this problem. Format them as:
+1. First hint
+2. Second hint
+3. Third hint`
+   } else {
+      return `For the LeetCode question "${questionName}" in ${language}, here is my code:
+      
+${codeInQuestion}
 
-   let notCodingResponse = `"THIS IS NOT A CODING QUESTION"`
-
-   return `
-    I am working on the LeetCode problem "${questionName}" using "${language}". Below is my current code:
-
-    \`\`\`
-    ${codeInQuestion}
-    \`\`\`
-
-    Now, based on the following criteria, provide the necessary response:
-
-    ${hint ? `### If Hints Are Requested:` : `### If a Solution Is Requested:`}
-    - ${action}.
-    - ${
-       hint
-          ? "Identify exactly three critical issues (bugs, inefficiencies, or incorrect logic)."
-          : "Return only the correct and optimized solution in the chosen language."
-    }
-    - Format your response as follows:
-      \`\`\`
-      ${format}
-      \`\`\`
-    - ${hint ? "Keep your total response under 250 characters." : "Keep the response concise and well-structured."}
-    - If this is not a coding-related question, respond **only** with: ${notCodingResponse}.
-      `
+Please provide a complete solution with a brief explanation. Format the response as clear text without any markdown or code block syntax.`
+   }
 }
 
 // 3. Function to send the request and return the result
 const postQuestion = async (codeInQuestion, hint, languageSelected) => {
-   // based on the user choosing hint or solution, select the action key senetence
-   let action = hint ? "Provide exactly three precise hints on how to fix my code" : "Provide a correct and optimized solution"
-
-   // engineer the prompt
-   generatePrompt(questionName, languageSelected, codeInQuestion, action)
-
-   // Send the request with the needed configurations
    try {
+      const prompt = generatePrompt(questionName, languageSelected, codeInQuestion, hint)
+      console.log('Sending request:', { prompt, languageSelected, codeInQuestion })
+
       const response = await fetch("/processQuestion", {
          method: "POST",
          headers: {
@@ -286,42 +275,48 @@ const postQuestion = async (codeInQuestion, hint, languageSelected) => {
          },
          body: JSON.stringify({
             question: prompt,
+            language: languageSelected,
+            code: codeInQuestion
          }),
       })
 
-      // Error handling
       if (!response.ok) {
-         throw new Error("Network response was not ok")
+         throw new Error(`HTTP error! status: ${response.status}`)
       }
 
-      // set up response and return it
       const data = await response.json()
+      
+      if (!data.success && data.error) {
+         throw new Error(data.error)
+      }
+
       return data
+
    } catch (error) {
-      // Error handling
-      // console.error(error);
+      console.error('postQuestion Error:', error)
+      throw error
    }
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Event Listeners:
-// 1.
+// 1. Click on the hint button to receive hints
 hintBtn.addEventListener("click", async (event) => {
    questionName = questionBar.value
 
    displayResponse(event, true, language)
 })
-// 2.
+// 2. Click on the solution button to get full soln
 solnBtn.addEventListener("click", async (event) => {
    displayResponse(event, false, language)
 })
-// 3.
+// 3. Click outside dropdown to close it
 window.addEventListener("click", function (event) {
    if (!dropdown.contains(event.target)) {
       applyToMenu("add")
    }
 })
-// 4.
+// 4. Dropdown menu
 dropdown.addEventListener("click", function (e) {
    e.stopPropagation()
    applyToMenu("toggle")
@@ -362,3 +357,49 @@ inputElement.addEventListener("input", (e) => {
    inputElement.style.height = "auto"
    inputElement.style.height = inputElement.scrollHeight + "px"
 })
+
+// Local Storage Management
+const STORAGE_KEY = 'leetcode_hints_history'
+
+const saveToHistory = (question, code, language, response) => {
+   const history = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]')
+   history.unshift({
+      timestamp: new Date().toISOString(),
+      question,
+      code,
+      language,
+      response
+   })
+   // Keep only last 10 entries
+   if (history.length > 10) history.pop()
+   localStorage.setItem(STORAGE_KEY, JSON.stringify(history))
+}
+
+const loadHistory = () => {
+   return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]')
+}
+
+// Helper functions for better code organization
+const showLoadingState = () => {
+   spinner.style.display = "block"
+   resultList.innerHTML = ""
+   resultList.appendChild(loadMessage)
+}
+
+const hideLoadingState = () => {
+   spinner.style.display = "none"
+}
+
+const handleError = (error) => {
+   console.error('Error:', error)
+   resultList.innerHTML = "An error occurred. Please try again."
+}
+
+// Add theme toggle functionality
+const toggleTheme = () => {
+   document.body.classList.toggle('light-theme')
+   localStorage.setItem('theme', document.body.classList.contains('light-theme') ? 'light' : 'dark')
+}
+
+// Initialize theme from localStorage
+document.body.classList.toggle('light-theme', localStorage.getItem('theme') === 'light')
