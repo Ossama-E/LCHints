@@ -13,12 +13,8 @@
 
 <body>
   <div id="header">
-    <h2>
-      <a class="btn-nav" href="https://www.linkedin.com/in/ossamaelhelali/"
-        >LinkedIn</a
-      >
-    </h2>
-    <button class="btn-nav"></button>
+    <h2><a class="btn-nav" href="https://www.linkedin.com/in/ossamaelhelali/">LinkedIn</a></h2>
+    <button id="toggle-history" class="btn-nav">History</button>
     <h2><a class="btn-nav" href="https://github.com/Ossama-E">GitHub</a></h2>
   </div>
 
@@ -82,6 +78,14 @@
   <div id="footer">
     <p class="alignleft">Advertising &emsp; About</p>
     <p class="alignright">Privacy &emsp; Terms &emsp; Settings</p>
+  </div>
+
+  <div id="history-panel" class="history-panel">
+    <div class="history-header">
+      <h3>Previous Questions</h3>
+      <button id="clear-history" class="btn-nav">Clear History</button>
+    </div>
+    <div id="history-list" class="history-list"></div>
   </div>
 
   <script src="script.js"></script>

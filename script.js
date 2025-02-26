@@ -14,6 +14,10 @@ const questionBar = document.getElementById("question-name-box")
 const popup = document.querySelector(".popup")
 const loadMessage = document.createElement("li")
 const dropdown = document.querySelector(".dropdown")
+const historyPanel = document.getElementById('history-panel')
+const toggleHistory = document.getElementById('toggle-history')
+const clearHistory = document.getElementById('clear-history')
+const historyList = document.getElementById('history-list')
 let questionName = questionBar.value
 let language = selectElement.textContent
 let editor = ""
@@ -176,6 +180,9 @@ const displayResponse = async (e, hint) => {
          return
       }
 
+      // Disable buttons during request
+      disableButtons()
+
       // Show loading state
       resultList.scrollIntoView({ behavior: "smooth" })
       spinner.style.display = "block"
@@ -239,6 +246,7 @@ const displayResponse = async (e, hint) => {
       resultList.innerHTML = "An error occurred. Please try again."
    } finally {
       spinner.style.display = "none"
+      enableButtons()
    }
 }
 
@@ -373,6 +381,7 @@ const saveToHistory = (question, code, language, response) => {
    // Keep only last 10 entries
    if (history.length > 10) history.pop()
    localStorage.setItem(STORAGE_KEY, JSON.stringify(history))
+   renderHistory()
 }
 
 const loadHistory = () => {
@@ -403,3 +412,97 @@ const toggleTheme = () => {
 
 // Initialize theme from localStorage
 document.body.classList.toggle('light-theme', localStorage.getItem('theme') === 'light')
+
+// Add button disable/enable functions
+const disableButtons = () => {
+    hintBtn.disabled = true
+    solnBtn.disabled = true
+    hintBtn.style.opacity = '0.5'
+    solnBtn.style.opacity = '0.5'
+    toggleHistory.disabled = true
+    toggleHistory.style.opacity = '0.5'
+}
+
+const enableButtons = () => {
+    hintBtn.disabled = false
+    solnBtn.disabled = false
+    hintBtn.style.opacity = '1'
+    solnBtn.style.opacity = '1'
+    toggleHistory.disabled = false
+    toggleHistory.style.opacity = '1'
+}
+
+// Wait for DOM to load before trying to find elements
+document.addEventListener('DOMContentLoaded', () => {
+    const historyPanel = document.getElementById('history-panel')
+    const toggleHistory = document.getElementById('toggle-history')
+    const clearHistory = document.getElementById('clear-history')
+    const historyList = document.getElementById('history-list')
+
+    if (!historyPanel || !toggleHistory) {
+        console.error('History elements not found:', {
+            panel: historyPanel,
+            button: toggleHistory
+        })
+        return
+    }
+
+    toggleHistory.addEventListener('click', () => {
+        console.log('Toggling history panel')
+        historyPanel.classList.toggle('open')
+    })
+
+    if (clearHistory) {
+        clearHistory.addEventListener('click', () => {
+            if (confirm('Are you sure you want to clear all history?')) {
+                localStorage.removeItem(STORAGE_KEY)
+                renderHistory()
+            }
+        })
+    }
+
+    // Initial render
+    renderHistory()
+})
+
+// Keep your existing constants and functions here
+const renderHistory = () => {
+    const historyList = document.getElementById('history-list')
+    if (!historyList) return
+
+    const history = loadHistory()
+    historyList.innerHTML = ''
+    
+    if (history.length === 0) {
+        historyList.innerHTML = '<div class="history-item"><p>No history yet</p></div>'
+        return
+    }
+
+    history.forEach(item => {
+        const historyItem = document.createElement('div')
+        historyItem.className = 'history-item'
+        
+        const date = new Date(item.timestamp).toLocaleDateString()
+        const time = new Date(item.timestamp).toLocaleTimeString()
+        
+        historyItem.innerHTML = `
+            <h4>${item.question || 'Untitled'}</h4>
+            <div class="history-meta">
+                ${date} ${time} • ${item.language || 'Unknown'}
+            </div>
+            <div class="history-preview">
+                ${item.code ? item.code.split('\n')[0] : 'No code'}...
+            </div>
+        `
+        
+        // Add click handler to restore this question
+        historyItem.addEventListener('click', () => {
+            questionBar.value = item.question
+            selectElement.textContent = item.language
+            editor.setValue(item.code)
+            historyPanel.classList.remove('open')
+        })
+        
+        historyList.appendChild(historyItem)
+    })
+}
