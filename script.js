@@ -210,30 +210,19 @@ const displayResponse = async (e, hint) => {
          return
       }
 
-      // Clean up the response text
-      let cleanResponse = result.response
-         .replace(/```/g, '') // Remove code block markers
-         .replace(/^\s*[\d.]+\s*['"]\s*/gm, '') // Remove numbered quotes at start of lines
-         .replace(/['"]\s*$/gm, '') // Remove quotes at end of lines
-         .trim()
+      // Save to history after successful response
+      saveToHistory(questionBar.value, codeInQuestion, language, result.response)
 
       // Handle hints or solution
       if (hint) {
-         // Split by numbers followed by dot, but keep the numbers
-         const hints = cleanResponse.split(/(?=\d+\.)/)
-            .filter(hint => hint.trim())
-            .map(hint => hint.trim())
-
-         for (const hint of hints) {
+         const hints = result.response.split(/\d+\./).filter(hint => hint.trim())
+         for (let i = 0; i < hints.length; i++) {
             const listItem = document.createElement("li")
             resultList.appendChild(listItem)
-            await animateTyping(listItem, hint, 20)
+            await animateTyping(listItem, `${i + 1}. ${hints[i].trim()}`, 20)
          }
       } else {
-         const lines = cleanResponse.split('\n')
-            .filter(line => line.trim())
-            .map(line => line.trim())
-
+         const lines = result.response.split('\n').filter(line => line.trim())
          for (const line of lines) {
             const listItem = document.createElement("li")
             resultList.appendChild(listItem)
@@ -370,18 +359,39 @@ inputElement.addEventListener("input", (e) => {
 const STORAGE_KEY = 'leetcode_hints_history'
 
 const saveToHistory = (question, code, language, response) => {
-   const history = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]')
-   history.unshift({
-      timestamp: new Date().toISOString(),
-      question,
-      code,
-      language,
-      response
-   })
-   // Keep only last 10 entries
-   if (history.length > 10) history.pop()
-   localStorage.setItem(STORAGE_KEY, JSON.stringify(history))
-   renderHistory()
+    const history = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]')
+    
+    // Only save if we have actual content
+    if (!question || !code) return
+    
+    // Check if it's a non-LeetCode question response
+    if (response.toUpperCase().includes("NOT A CODING") || 
+        response.toUpperCase().includes("NOT A LEETCODE")) {
+        console.log('Not saving non-LeetCode question to history')
+        return
+    }
+
+    const historyItem = {
+        timestamp: new Date().toISOString(),
+        question: question.trim(),
+        code: code.trim(),
+        language: language || 'Unknown',
+        response: response
+    }
+
+    // Don't add duplicate entries
+    const isDuplicate = history.some(item => 
+        item.question === historyItem.question && 
+        item.code === historyItem.code &&
+        item.language === historyItem.language
+    )
+
+    if (!isDuplicate) {
+        history.unshift(historyItem)
+        if (history.length > 10) history.pop()
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(history))
+        renderHistory()
+    }
 }
 
 const loadHistory = () => {
@@ -479,6 +489,14 @@ const renderHistory = () => {
     }
 
     history.forEach(item => {
+        // Skip rendering if it's a non-LeetCode question
+        if (item.response && (
+            item.response.toUpperCase().includes("NOT A CODING") || 
+            item.response.toUpperCase().includes("NOT A LEETCODE")
+        )) {
+            return
+        }
+
         const historyItem = document.createElement('div')
         historyItem.className = 'history-item'
         
@@ -495,12 +513,31 @@ const renderHistory = () => {
             </div>
         `
         
-        // Add click handler to restore this question
+        // Updated click handler to properly restore state
         historyItem.addEventListener('click', () => {
+            // Restore question name
             questionBar.value = item.question
-            selectElement.textContent = item.language
-            editor.setValue(item.code)
-            historyPanel.classList.remove('open')
+
+            // Restore language selection
+            language = item.language // Update the global language variable
+            const langButton = document.querySelector('.language-select')
+            if (langButton) {
+                langButton.textContent = item.language
+            }
+
+            // Restore code in editor
+            if (editor) {
+                editor.setValue(item.code)
+                // Force the editor to update
+                editor.clearSelection()
+                editor.focus()
+            }
+
+            // Close the history panel
+            const historyPanel = document.getElementById('history-panel')
+            if (historyPanel) {
+                historyPanel.classList.remove('open')
+            }
         })
         
         historyList.appendChild(historyItem)
