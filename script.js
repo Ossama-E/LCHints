@@ -543,3 +543,23 @@ const renderHistory = () => {
         historyList.appendChild(historyItem)
     })
 }
+
+// Close history panel when clicking outside
+document.addEventListener('click', function(event) {
+    const historyPanel = document.getElementById('history-panel');
+    const toggleHistory = document.getElementById('toggle-history');
+    
+    // If history panel is open and click is outside the panel and not on the toggle button
+    if (historyPanel && 
+        historyPanel.classList.contains('open') && 
+        !historyPanel.contains(event.target) && 
+        event.target !== toggleHistory) {
+        
+        historyPanel.classList.remove('open');
+    }
+});
+
+// Prevent clicks inside the panel from closing it
+document.getElementById('history-panel')?.addEventListener('click', function(event) {
+    event.stopPropagation();
+});
